@@ -39,7 +39,7 @@ Wizard-Module/
 
 ### 2.2. Veritabanı tablolarını oluştur
 
-DB-first bir sistem olduğu için tabloları migration ile değil, doğrudan SQL ile oluşturun (bkz. **Bölüm 3**). Oluşturduktan sonra scaffold/DB-first akışınızla `WizardStep` ve `WizardStepView` entity'lerinin karşılığını (veya bu iki DbSet'i) kendi `DbContext`'inize ekleyin — **`WizardDataService`, constructor'ında doğrudan bir `DbContext` bekler** ve `context.WizardSteps` / `context.WizardStepViews` üzerinden çalışır.
+Oluşturduktan sonra scaffold/DB-first akışınızla `WizardStep` ve `WizardStepView` entity'lerinin karşılığını (veya bu iki DbSet'i) kendi `DbContext`'inize ekleyin — **`WizardDataService`, constructor'ında doğrudan bir `DbContext` bekler** ve `context.WizardSteps` / `context.WizardStepViews` üzerinden çalışır.
 
 ### 2.3. İki seam'i implemente edin
 
@@ -173,10 +173,6 @@ GO
 | `WizardSteps.SortPath` | `NVARCHAR(50)` | Noktalı hiyerarşi (`"2.1"`, `"2.10"`). Metin değil **sayısal** segment bazlı sıralanır — uygulama katmanında. |
 | `WizardSteps.RequiredPermission` | `NVARCHAR(100)` NULL | Boşsa adım herkese açık. Doluysa EDI'nin yetki tablosundaki yetki adıyla **birebir aynı** olmalı. |
 | `WizardStepViews.UserId` | `NVARCHAR(100)` | Host sistemin kullanıcı kimliği, metne çevrilmiş hâliyle. |
-
-### Mevcut (eski sürüm) kurulumdan yükseltme
-
-Temiz kurulumda gerek yok. Yalnızca modülün önceki bir sürümünü (`UserWizardStatuses` tablolu, tek `LastSeenStepId` alanlı sürüm) çalıştırmış bir kurulumdan geliyorsanız migration script'leri gerekir — proje geçmişinde `WizardDelivery/02-migrate-from-userwizardstatus.sql`, `03-sortpath-benzersiz.sql`, `04-required-permission.sql` dosyalarına bakın.
 
 ---
 
