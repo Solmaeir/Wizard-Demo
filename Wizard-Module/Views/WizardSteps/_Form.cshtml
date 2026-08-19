@@ -1,0 +1,62 @@
+@model Wizard.Module.ViewModels.WizardStepViewModel
+@*
+    Ekleme ve düzenleme formunun ortak gövdesi. İki sayfa da bunu kullanıyor ki
+    alanlar birbirinden ayrı düşmesin.
+
+    Alanların anlamı:
+      TargetSelector - her zaman [data-wizard-id="..."] biçiminde yazılır
+      TargetUrl      - boşsa adım bulunduğu sayfada gösterilir; doluysa oraya
+                       gidilir. Yalnızca "/" ile başlayan iç adres kabul edilir,
+                       kuralı ViewModel'deki regex uygular
+      SortPath       - noktalı sıra, örn. "2.1"; ilk segment modülün turdaki yeri
+*@
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<input type="hidden" asp-for="Id" />
+
+<div class="form-group">
+    <label asp-for="SortPath"></label>
+    <input asp-for="SortPath" class="form-control" placeholder="2.1" />
+    <span asp-validation-for="SortPath" class="text-danger"></span>
+    <small class="form-text text-muted">Her adımın sırası benzersiz olmalı. İlk segment modülün turdaki yerini belirler: <code>2.1</code>, <code>2.2</code>, <code>2.2.1</code>.</small>
+</div>
+
+<div class="form-group">
+    <label asp-for="ModuleName"></label>
+    <input asp-for="ModuleName" class="form-control" />
+    <span asp-validation-for="ModuleName" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="Title"></label>
+    <input asp-for="Title" class="form-control" />
+    <span asp-validation-for="Title" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="Description"></label>
+    <textarea asp-for="Description" class="form-control" rows="3" data-wizard-counter></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="TargetSelector"></label>
+    <input asp-for="TargetSelector" class="form-control" placeholder="[data-wizard-id=&quot;products-menu&quot;]" />
+    <span asp-validation-for="TargetSelector" class="text-danger"></span>
+    <small class="form-text text-muted">Yalnızca <code>[data-wizard-id="..."]</code> biçimi kabul edilir. Hedef elemana bu özniteliğin sayfada eklenmiş olması gerekir.</small>
+</div>
+
+<div class="form-group">
+    <label asp-for="TargetUrl"></label>
+    <input asp-for="TargetUrl" class="form-control" placeholder="/Urunler" />
+    <span asp-validation-for="TargetUrl" class="text-danger"></span>
+    <small class="form-text text-muted">Boş bırakılırsa adım, kullanıcının bulunduğu sayfada gösterilir.</small>
+</div>
+
+<div class="form-group">
+    <label asp-for="RequiredPermission"></label>
+    <input asp-for="RequiredPermission" class="form-control" placeholder="Ürünler" />
+    <span asp-validation-for="RequiredPermission" class="text-danger"></span>
+    <small class="form-text text-muted">Boş bırakılırsa adımı herkes görür. Doldurulursa yalnızca bu yetkiye sahip kullanıcılar görür; değer host sistemdeki yetki adıyla birebir aynı olmalı.</small>
+</div>

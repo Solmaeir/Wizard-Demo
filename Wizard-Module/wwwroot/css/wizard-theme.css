@@ -1,0 +1,225 @@
+/* Tanıtım turunun görünümü. driver.js kendi varsayılan stilini getiriyor, burası
+   onun üzerine yazıyor — bu yüzden kurallarda bolca !important var; kütüphanenin
+   kendi seçicileri daha güçlü olduğu için başka türlü tutmuyor.
+
+   Turla ilgili bütün görsel düzenleme bu dosyada. Modül EDI'ye taşınırken
+   wizard-module.js ile birlikte bu dosya da gidiyor, site.css'e karışmıyor. */
+
+/* Aydınlatılan alan hedefin kendi alanı kadar olduğu için parlama içeriden verilir;
+   dışarıya taşan bir halka karartmanın altında kalır ve köşelerde beyaz izler bırakır. */
+.driver-active-element {
+    animation: wizardGlowPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes wizardGlowPulse {
+    0%, 100% {
+        box-shadow: inset 0 0 10px 2px rgba(43, 128, 212, 0.45);
+    }
+    50% {
+        box-shadow: inset 0 0 18px 5px rgba(43, 128, 212, 0.8);
+    }
+}
+
+/* Vurgulanan (spot ışığındaki) alanın üzerinden geçen cam yansıması - karartılmış kısımlara değil */
+.wizard-shimmer-layer {
+    position: fixed;
+    z-index: 1000000002;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.wizard-shimmer-layer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    transform: translateX(-150%);
+    background: linear-gradient(100deg,
+        transparent 0%,
+        rgba(43, 128, 212, 0.35) 35%,
+        rgba(255, 255, 255, 0.75) 50%,
+        rgba(43, 128, 212, 0.35) 65%,
+        transparent 100%);
+    animation: wizardSpotlightSweep 2.4s linear infinite;
+    will-change: transform;
+}
+
+@keyframes wizardSpotlightSweep {
+    to {
+        transform: translateX(350%);
+    }
+}
+
+/* Bilgi kutusu: rengi çerçeve boyunca sürekli döngüde akan kenarlık.
+   Renk açısı animasyonlu; eleman DÖNMÜYOR (döndürmek köşeleri taşırıyor).
+
+   Renk dizisinde beyaz iki kez geçiyor (kırmızı - beyaz - mavi - beyaz - kırmızı).
+   Araya beyaz konmazsa kırmızıyla mavi doğrudan birbirine geçiyor ve aradaki
+   bölge mor görünüyor. */
+@property --wizard-border-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.driver-popover {
+    border: 3px solid transparent !important;
+    border-radius: 10px !important;
+    background:
+        linear-gradient(#fff, #fff) padding-box,
+        conic-gradient(from var(--wizard-border-angle), #e63946, #ffffff, #2b80d4, #ffffff, #e63946) border-box !important;
+    opacity: 0 !important;
+    animation:
+        wizardBorderFlow 3s linear infinite,
+        wizardBorderGlow 1.8s ease-in-out infinite !important;
+}
+
+/* Giriş animasyonu, driver.js konumlandırmayı bitirdikten SONRA JS ile eklenir.
+   Aksi halde transform: scale(), driver.js'in getBoundingClientRect() ölçümünü
+   küçültüp popover'ı yanlış yere konumlandırır. */
+/* Hedefle bilgi kutusu arasındaki görsel boşluk. driver.js'in popoverOffset
+   ayarını KULLANMIYORUZ: o değer kütüphanenin sığdırma hesabına giriyor ve dar
+   alanlarda popover'ı yanlış tarafa atıyor. translate ise konumlandırma bittikten
+   sonra sadece görsel kaydırma yapar, hesaba hiç karışmaz. Yönü JS belirler.
+
+   Süre (420ms) wizard-module.js'teki WIZARD_ENTRANCE_MS ile aynı olmalı; JS
+   animasyon bittikten sonra konumu yeniden hesaplatıyor. */
+.driver-popover.wizard-animate-in {
+    opacity: 1 !important;
+    transform: translate(var(--wizard-gap-x, 0px), var(--wizard-gap-y, 0px));
+    animation:
+        wizardPopoverGrow 420ms cubic-bezier(.34, 1.56, .64, 1),
+        wizardBorderFlow 3s linear infinite,
+        wizardBorderGlow 1.8s ease-in-out infinite !important;
+}
+
+@keyframes wizardBorderFlow {
+    to {
+        --wizard-border-angle: 360deg;
+    }
+}
+
+/* Çerçevenin nabız gibi atan parlaması */
+@keyframes wizardBorderGlow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(43, 128, 212, 0.45), 0 0 20px rgba(230, 57, 70, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 22px rgba(43, 128, 212, 0.75), 0 0 40px rgba(230, 57, 70, 0.45);
+    }
+}
+
+/* Popover, oku hangi kenardaysa o kenardan varoluşur; hafifçe taşıp yerine oturur */
+@keyframes wizardPopoverGrow {
+    0% {
+        transform: translate(var(--wizard-gap-x, 0px), var(--wizard-gap-y, 0px)) scale(0.05);
+        opacity: 0;
+    }
+    60% {
+        transform: translate(var(--wizard-gap-x, 0px), var(--wizard-gap-y, 0px)) scale(1.08);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--wizard-gap-x, 0px), var(--wizard-gap-y, 0px)) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Kendi kapatma butonumuz (driver.js'inki allowClose:false iken basılmıyor) */
+.driver-popover .wizard-close-btn {
+    all: unset !important;
+    position: absolute !important;
+    top: 4px !important;
+    right: 6px !important;
+    width: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    text-align: center !important;
+    font-size: 20px !important;
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif !important;
+    color: #adb5bd !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    z-index: 2 !important;
+    transition: color .15s ease, background-color .15s ease !important;
+}
+
+.driver-popover .wizard-close-btn:hover {
+    color: #495057 !important;
+    background-color: #f1f3f5 !important;
+}
+
+/* Buton görünümü - ikisi de gri, aralarında boşluk, daha ufak ve daha yuvarlak */
+.driver-popover-navigation-btns {
+    gap: 10px !important;
+}
+
+.driver-popover-footer button + button {
+    margin-left: 0 !important;
+}
+
+.driver-popover-footer button.driver-popover-next-btn,
+.driver-popover-footer button.driver-popover-prev-btn {
+    all: unset !important;
+    box-sizing: border-box !important;
+    padding: 5px 12px !important;
+    border-radius: 8px !important;
+    font: 12px/normal "Segoe UI", Helvetica, Arial, sans-serif !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    background-color: #f1f3f5 !important;
+    color: #495057 !important;
+    border: 1px solid #dee2e6 !important;
+    transition: background-color .15s ease !important;
+}
+
+.driver-popover-footer button.driver-popover-next-btn:hover,
+.driver-popover-footer button.driver-popover-prev-btn:hover {
+    background-color: #e2e6ea !important;
+}
+
+.driver-popover-footer button.driver-popover-prev-btn.driver-popover-btn-disabled {
+    opacity: .5 !important;
+}
+
+/* "Bölümü Atla" - ikincil eylem olduğu için daha silik, çerçeve yok */
+.driver-popover-footer button.wizard-skip-btn {
+    all: unset !important;
+    box-sizing: border-box !important;
+    padding: 5px 10px !important;
+    border-radius: 8px !important;
+    font: 12px/normal "Segoe UI", Helvetica, Arial, sans-serif !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    background-color: transparent !important;
+    color: #868e96 !important;
+    border: 1px solid transparent !important;
+    white-space: nowrap !important;
+    transition: background-color .15s ease, color .15s ease !important;
+}
+
+.driver-popover-footer button.wizard-skip-btn:hover {
+    background-color: #f1f3f5 !important;
+    color: #495057 !important;
+}
+
+/* Uzun adım metinleri kutuyu bozmasın.
+
+   İki ayrı sorun var:
+   1) Boşluksuz uzun bir dizi (yapıştırılmış bir kod, bir URL) satır sonu bulamıyor
+      ve kutunun dışına taşıyor — metin ekranın sağına doğru akıp gidiyordu.
+      overflow-wrap: anywhere, tarayıcıya "gerekirse kelimenin ortasından böl" diyor.
+   2) Uzun ama düzgün metin de kutuyu ekranı dolduracak kadar uzatabiliyor.
+      Açıklama 1000 karaktere kadar girilebildiği için yüksekliği sınırlayıp
+      kendi içinde kaydırılabilir yapıyoruz; kutu her zaman ekrana sığıyor. */
+.driver-popover-title,
+.driver-popover-description {
+    overflow-wrap: anywhere;
+}
+
+.driver-popover-description {
+    max-height: 40vh;
+    overflow-y: auto;
+}

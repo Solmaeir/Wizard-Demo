@@ -1,0 +1,23 @@
+@model Wizard.Module.ViewModels.WizardStepViewModel
+@*
+    Adımı düzenle. Oluşturulma tarihi forma konmuyor: değeri güncellemede
+    veritabanındaki kayıttan okunup korunuyor, forma güvenilmiyor.
+*@
+
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Adımı Düzenle</h3>
+    </div>
+    <form asp-action="Edit" method="post">
+        <div class="card-body">
+            @await Html.PartialAsync("_Form", Model)
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Index" class="btn btn-default">Vazgeç</a>
+        </div>
+    </form>
+</div>
+
+@* Karakter sayacı. Yüklenmezse form aynen çalışır; sınırı uygulayan taraf sunucu. *@
+<script src="~/js/wizard-admin.js" asp-append-version="true"></script>

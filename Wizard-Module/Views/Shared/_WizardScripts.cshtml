@@ -1,0 +1,46 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery WizardAntiforgery
+@*
+    Wizard modülünün tarayıcı tarafını sayfaya bağlayan tek parça. Host sistemin
+    tek yapması gereken, ana düzeninde (layout) </body> kapanmadan önce şunu
+    çağırmak:
+
+        @@await Html.PartialAsync("_WizardScripts")
+
+    Böylece adresler, jeton, kütüphane ve tema tek yerden gelir; host layout'una
+    Wizard'a ait başka hiçbir satır eklenmez.
+*@
+@{
+    // Sahtecilik jetonu. MarkSeen isteği POST olduğu için gerekiyor ve tarayıcı
+    // tarafında üretilemez; sunucudan buradan taşınıyor.
+    var wizardToken = WizardAntiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<link rel="stylesheet" href="~/lib/driver.js/dist/driver.css" />
+<link rel="stylesheet" href="~/css/wizard-theme.css" asp-append-version="true" />
+
+@*
+    Adresler Url.Action ile üretiliyor: yönlendirme kuralları değişirse (alan/area,
+    ön ek, farklı rota şablonu) adresler kendiliğinden düzelir. wizard-module.js
+    içine elle "/Wizard/GetSteps" yazılsaydı, JS dosyası host'un yönlendirmesine
+    bağımlı hâle gelirdi.
+
+    Bu blok wizard-module.js'ten ÖNCE gelmeli; script yüklenir yüklenmez
+    wizardConfig'i okuyor.
+*@
+<script>
+    window.wizardConfig = {
+        getStepsUrl: '@Url.Action("GetSteps", "Wizard")',
+        getAllStepsUrl: '@Url.Action("GetAllSteps", "Wizard")',
+        markSeenUrl: '@Url.Action("MarkSeen", "Wizard")',
+        antiforgeryToken: '@wizardToken',
+        antiforgeryFieldName: '__RequestVerificationToken'
+    };
+</script>
+
+@*
+    driver.js yerel dosyadan yükleniyor, CDN'den değil. İki sebep: kapalı kurum
+    ağlarında CDN'e erişilemiyor ve tur sessizce hiç açılmıyordu; ayrıca dışarıdan
+    gelen bir script her sayfada çalıştığı için güven sınırının içine giriyordu.
+*@
+<script src="~/lib/driver.js/dist/driver.js.iife.js"></script>
+<script src="~/js/wizard-module.js" asp-append-version="true"></script>
